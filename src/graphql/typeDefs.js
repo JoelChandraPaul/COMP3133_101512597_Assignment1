@@ -1,6 +1,4 @@
 const typeDefs = `#graphql
-  scalar Upload
-
   type User {
     _id: ID!
     username: String!
@@ -38,6 +36,7 @@ const typeDefs = `#graphql
     salary: Float!
     date_of_joining: String!
     department: String!
+    employee_photo: String
   }
 
   type Query {
@@ -51,7 +50,7 @@ const typeDefs = `#graphql
   type Mutation {
     signup(username: String!, email: String!, password: String!): User!
 
-    addEmployee(input: EmployeeInput!, photo: Upload): Employee!
+    addEmployee(input: EmployeeInput!): Employee!
     updateEmployeeByEid(eid: ID!, input: EmployeeInput!): Employee!
     deleteEmployeeByEid(eid: ID!): Boolean!
   }

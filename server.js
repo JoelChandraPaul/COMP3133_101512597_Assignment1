@@ -7,22 +7,21 @@ const { ApolloServer } = require("@apollo/server");
 const { ApolloServerPluginDrainHttpServer } = require("@apollo/server/plugin/drainHttpServer");
 const { expressMiddleware } = require("@as-integrations/express4");
 
-// ✅ Upload middleware (required for Upload scalar)
-const { graphqlUploadExpress } = require("graphql-upload");
-
 const connectDB = require("./src/config/db");
 const typeDefs = require("./src/graphql/typeDefs");
 const resolvers = require("./src/graphql/resolvers");
+
+const uploadRoutes = require("./src/routes/upload");
 
 async function start() {
   const app = express();
   const httpServer = http.createServer(app);
 
   app.use(cors());
-
-  // IMPORTANT: upload middleware must come BEFORE express.json()
-  app.use(graphqlUploadExpress({ maxFileSize: 10_000_000, maxFiles: 1 }));
   app.use(express.json());
+
+
+  app.use("/upload", uploadRoutes);
 
   await connectDB();
 
@@ -46,6 +45,7 @@ async function start() {
   const port = process.env.PORT || 4000;
   await new Promise((resolve) => httpServer.listen({ port }, resolve));
   console.log(`🚀 Server ready at http://localhost:${port}/graphql`);
+  console.log(`📷 Upload endpoint: http://localhost:${port}/upload/employee-photo`);
 }
 
 start().catch((err) => {

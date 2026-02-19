@@ -1,10 +1,7 @@
 const jwt = require("jsonwebtoken");
-const { GraphQLUpload } = require("graphql-upload");
-
 const User = require("../models/User");
 const Employee = require("../models/Employee");
 const auth = require("../middleware/auth");
-const cloudinary = require("../config/cloudinary");
 
 function generateToken(user) {
   const secret = process.env.JWT_SECRET;
@@ -17,26 +14,7 @@ function generateToken(user) {
   );
 }
 
-async function uploadToCloudinary(upload) {
-  // upload is a promise that resolves to file info
-  const { createReadStream } = await upload;
-  const stream = createReadStream();
-
-  return new Promise((resolve, reject) => {
-    const uploadStream = cloudinary.uploader.upload_stream(
-      { folder: "employees" },
-      (error, result) => {
-        if (error) return reject(error);
-        resolve(result);
-      }
-    );
-    stream.pipe(uploadStream);
-  });
-}
-
 const resolvers = {
-  Upload: GraphQLUpload,
-
   Query: {
     login: async (_, { usernameOrEmail, password }) => {
       if (!usernameOrEmail || !password) throw new Error("All fields are required");
@@ -99,24 +77,15 @@ const resolvers = {
       return user;
     },
 
-    addEmployee: async (_, { input, photo }, context) => {
+    addEmployee: async (_, { input }, context) => {
       auth(context.req);
 
       if (!input) throw new Error("Employee input is required");
       if (input.salary < 1000) throw new Error("Salary must be at least 1000");
 
-      let photoUrl = "";
-
-      // If a file is provided, upload it to Cloudinary
-      if (photo) {
-        const result = await uploadToCloudinary(photo);
-        photoUrl = result.secure_url;
-      }
-
       const emp = await Employee.create({
         ...input,
         date_of_joining: new Date(input.date_of_joining),
-        employee_photo: photoUrl,
       });
 
       return emp;
