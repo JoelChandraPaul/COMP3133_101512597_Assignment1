@@ -16,6 +16,7 @@
    npm install
 
 2. Create a .env file in the project root:
+
     MONGO_URI=your_mongodb_atlas_connection_string
     PORT=4000
     JWT_SECRET=your_long_secret
